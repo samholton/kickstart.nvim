@@ -74,6 +74,16 @@ require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
+  -- {
+  --   "nvim-tree/nvim-tree.lua",
+  --   dependencies = {
+  --     "nvim-tree/nvim-web-devicons"
+  --   },
+  --   cmd = "NvimTreeToggle",
+  --   lazy = true,
+  --   config = true
+  -- },
+
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
@@ -125,6 +135,9 @@ require('lazy').setup({
       },
       on_attach = function(bufnr)
         vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, { buffer = bufnr, desc = 'Preview git hunk' })
+        vim.keymap.set('n', '<leader>hr', require('gitsigns').reset_hunk, { buffer = bufnr, desc = 'Reset git hunk' })
+        vim.keymap.set('n', '<leader>td', require('gitsigns').toggle_deleted, { buffer = bufnr, desc = 'Toggle deleted hunk' })
+        vim.keymap.set('n', '<leader>tb', require('gitsigns').toggle_current_line_blame, { buffer = bufnr, desc = 'Toggle line blame' })
 
         -- don't override the built-in and fugitive keymaps
         local gs = package.loaded.gitsigns
@@ -271,7 +284,21 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+vim.o.incsearch = true
+vim.o.scrolloff = 10
+vim.o.relativenumber = true
+vim.opt.wrap = false
+vim.opt.spell = true
+vim.opt.spelllang = 'en_us'
+
+
 -- [[ Basic Keymaps ]]
+
+vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+
+-- move lines up and down
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
@@ -292,6 +319,11 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   pattern = '*',
 })
 
+-- require('nvim-tree').setup {
+--   view = {
+--     width = 40,
+--   }
+-- }
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
@@ -355,7 +387,8 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
-vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
+vim.keymap.set('n', '<leader>sF', function() require('telescope.builtin').git_files( {cwd = find_git_root()} ) end, { desc = '[S]earch Git [F]iles' })
+vim.keymap.set('n', '<leader>ss', function() require('telescope.builtin').git_status( {cwd = find_git_root()} ) end, { desc = '[S]earch Git [S]tatus' })
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
@@ -370,7 +403,7 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'terraform', 'yaml', 'markdown', 'groovy', 'hcl', 'java', 'json', 'sql'},
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -436,7 +469,7 @@ end, 0)
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
+-- vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
 -- [[ Configure LSP ]]
@@ -522,6 +555,15 @@ local servers = {
       telemetry = { enable = false },
     },
   },
+
+  terraformls = {},
+  bashls = {},
+  yamlls = {},
+  pylsp = {},
+  remark_ls = {},
+  jsonls ={},
+  helm_ls = {},
+  dockerls = {},
 }
 
 -- Setup neovim lua configuration
@@ -599,3 +641,5 @@ cmp.setup {
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = 'Toggle nvim-tree' })
